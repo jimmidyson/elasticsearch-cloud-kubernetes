@@ -9,4 +9,4 @@ discovery:
   type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
-  plugins: /usr/share/elasticsearch/plugins
+  plugins: /elasticsearch/plugins
