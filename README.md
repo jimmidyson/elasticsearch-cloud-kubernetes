@@ -31,7 +31,7 @@ discovery:
 path:
   data: /data/data
   logs: /data/log
-  plugins: /data/plugins
+  plugins: /elasticsearch/plugins
   work: /data/work
 ```
 
@@ -154,7 +154,7 @@ The DNS lookup is on the headless service name so that all existing nodes from t
               "containers": [
                 {
                   "name": "elasticsearch-container",
-                  "image": "fabric8/elasticsearch-k8s:1.5.0",
+                  "image": "fabric8/elasticsearch-k8s:1.5.2",
                   "imagePullPolicy": "PullIfNotPresent",
                   "env": [
                     {
@@ -218,7 +218,7 @@ The DNS lookup is on the headless service name so that all existing nodes from t
               "containers": [
                 {
                   "name": "elasticsearch-container",
-                  "image": "fabric8/elasticsearch-k8s:1.5.0",
+                  "image": "fabric8/elasticsearch-k8s:1.5.2",
                   "imagePullPolicy": "PullIfNotPresent",
                   "env": [
                     {
@@ -275,7 +275,7 @@ The DNS lookup is on the headless service name so that all existing nodes from t
               "containers": [
                 {
                   "name": "elasticsearch-container",
-                  "image": "fabric8/elasticsearch-k8s:1.5.0",
+                  "image": "fabric8/elasticsearch-k8s:1.5.2",
                   "imagePullPolicy": "PullIfNotPresent",
                   "env": [
                     {

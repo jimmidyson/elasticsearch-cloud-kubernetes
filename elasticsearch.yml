@@ -7,6 +7,13 @@ cloud:
 
 discovery:
   type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
+  zen:
+    ping:
+      multicast:
+        enabled: false
 
 path:
-  plugins: /usr/share/elasticsearch/plugins
+  plugins: /elasticsearch/plugins
+
+bootstrap:
+  mlockall: true
