@@ -16,13 +16,12 @@
 package io.fabric8.elasticsearch.cloud.kubernetes;
 
 import io.fabric8.kubernetes.api.model.Endpoints;
-import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Setting.Property;
 import org.elasticsearch.common.unit.TimeValue;
 
 
-public interface KubernetesAPIService extends LifecycleComponent {
+public interface KubernetesAPIService {
 
   String VERSION = "Elasticsearch/KubernetesCloud/1.0";
   Setting<String> NAME_SPACE_SETTING = Setting.simpleString("cloud.kubernetes.namespace", Property.NodeScope);

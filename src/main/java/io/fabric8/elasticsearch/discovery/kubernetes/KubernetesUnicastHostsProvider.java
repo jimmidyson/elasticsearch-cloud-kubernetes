@@ -22,13 +22,12 @@ import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
-import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.network.NetworkAddress;
 import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
+import org.elasticsearch.discovery.zen.UnicastHostsProvider;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
@@ -50,7 +49,6 @@ public class KubernetesUnicastHostsProvider extends AbstractComponent implements
   private long lastRefresh;
   private List<DiscoveryNode> cachedDiscoNodes;
 
-  @Inject
   public KubernetesUnicastHostsProvider(Settings settings,
                                         KubernetesAPIService kubernetesAPIService,
                                         TransportService transportService,

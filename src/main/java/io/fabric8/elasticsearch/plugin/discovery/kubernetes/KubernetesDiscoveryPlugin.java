@@ -18,10 +18,10 @@ package io.fabric8.elasticsearch.plugin.discovery.kubernetes;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIService;
 import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesAPIServiceImpl;
-import io.fabric8.elasticsearch.cloud.kubernetes.KubernetesModule;
 import io.fabric8.elasticsearch.discovery.kubernetes.KubernetesUnicastHostsProvider;
 
 import org.apache.logging.log4j.Logger;
@@ -29,16 +29,20 @@ import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.SetOnce;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.SpecialPermission;
+import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.common.inject.Module;
 import org.elasticsearch.common.logging.Loggers;
+import org.elasticsearch.common.network.NetworkService;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.discovery.DiscoveryModule;
+import org.elasticsearch.discovery.zen.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ZenDiscovery;
 import org.elasticsearch.plugins.DiscoveryPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportService;
 
 
 public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin, Closeable {
@@ -60,34 +64,29 @@ public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin
     logger.trace("Starting kubernetes discovery plugin...");
   }
 
-  public void onModule(DiscoveryModule discoveryModule) {
+  @Override
+  public Map<String, Supplier<Discovery>> getDiscoveryTypes(ThreadPool threadPool, TransportService transportService,
+                                                            ClusterService clusterService,
+                                                            UnicastHostsProvider hostsProvider) {
     if (isDiscoveryAlive(settings, logger)) {
-      logger.trace("Adding {} discovery type", KUBERNETES);
-      discoveryModule.addDiscoveryType(KUBERNETES, ZenDiscovery.class);
-      discoveryModule.addUnicastHostProvider(KUBERNETES, KubernetesUnicastHostsProvider.class);
-
+      return Collections.singletonMap(KUBERNETES,
+        () -> new ZenDiscovery(settings, threadPool, transportService, clusterService, hostsProvider));
     }
+    return null;
   }
 
   @Override
-  public Collection<Module> createGuiceModules() {
-    List<Module> modules = new ArrayList<>();
+  public Map<String, Supplier<UnicastHostsProvider>> getZenHostsProviders(TransportService transportService,
+                                                                          NetworkService networkService) {
     if (isDiscoveryAlive(settings, logger)) {
-      modules.add(new KubernetesModule(settings));
+      return Collections.singletonMap(KUBERNETES, () -> {
+        kubernetesAPIService.set(new KubernetesAPIServiceImpl(settings));
+        return new KubernetesUnicastHostsProvider(settings, kubernetesAPIService.get(), transportService, networkService);
+      });
     }
-    return modules;
+    return null;
   }
 
-  @Override
-  @SuppressWarnings("rawtypes") // Supertype uses raw type
-  public Collection<Class<? extends LifecycleComponent>> getGuiceServiceClasses() {
-    logger.debug("Register kubernetes discovery service");
-    Collection<Class<? extends LifecycleComponent>> services = new ArrayList<>();
-    if (isDiscoveryAlive(settings, logger)) {
-      services.add(KubernetesModule.getKubernetesServiceImpl());
-    }
-    return services;
-  }
 
   @Override
   public List<Setting<?>> getSettings() {
