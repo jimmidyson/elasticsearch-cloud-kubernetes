@@ -1,95 +1,19 @@
-Kubernetes Cloud Plugin for Elasticsearch:
-=========================================
+#
+# Copyright (C) 2015 Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-[![Build Status](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes.svg?branch=master)](https://travis-ci.org/fabric8io/elasticsearch-cloud-kubernetes)
-
-The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discovery mechanism.
-
-Installation
-============
-```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.4.0
-```
-
-Versions available
-==================
-
-As of `2.0.0`, each released version of this plugin is compatible with the equal version of Elasticsearch,
-e.g. `2.2.0` of this plugin is compatible with `2.2.0` of Elasticsearch.
-
-**Older versions**:
-* `1.3.x` for Elasticsearch `1.6` and `1.7`
-
-Kubernetes Pod Discovery
-===============================
-
-Kubernetes Pod discovery allows to use the kubernetes APIs to perform automatic discovery.
-Here is a simple sample configuration:
-
-```yaml
-cloud:
-  kubernetes:
-    service: ${SERVICE}
-    namespace: ${NAMESPACE}
-discovery:
-    type: kubernetes
-
-path:
-  data: /data/data
-  logs: /data/log
-  plugins: /data/plugins
-  work: /data/work
-```
-
-## Kubernetes auth
-
-The preferred way to authenticate to Kubernetes is to use [service accounts](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/service_accounts.md).
-This is fully supported by this Elasticsearch Kubernetes plugin as it uses the [Fabric8](http://fabric8.io) Kubernetes API client.
-
-As an example, to create a service account do something like:
-
-```
-cat <<EOF | kubectl create -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: elasticsearch
-EOF
-```
-
-This creates a service account called `elasticsearch`. To use this service account, you need to add the service account
-to your pod spec or your replication controller pod template spec like this:
-
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: elasticsearch
-  <SNIP>
-spec:
-  serviceAccountName: elasticsearch
-  <SNIP>
-```
-
-This will mount the service account token at `/var/run/secrets/kubernetes.io/servicaccount/token` & will be automatically
-read by the fabric8 kubernetes client when the request is made to the API server.
-
-# Kubernetes example
-
-In this example, we're going to use a headless service to look up the Elasticsearch cluster nodes to join.
-
-The following manifest uses 3 replication controllers to created Elasticsearch pods in 3 different modes:
-
-* master
-* data
-* client
-
-We use 2 services as well:
-
-* One to target the client pods so that all requests to the cluster go through the client nodes
-* A headless service to list all cluster endpoints managed by all 3 RCs.
-
-```yaml
 kind: "List"
 apiVersion: "v1"
 items:
@@ -97,10 +21,13 @@ items:
   kind: "Service"
   metadata:
     name: "elasticsearch"
+    labels:
+      component: "elasticsearch"
+      provider: "fabric8"
   spec:
     ports:
       - port: 9200
-        targetPort: "http"
+        targetPort: 9200
     selector:
       component: "elasticsearch"
       type: "client"
@@ -109,7 +36,11 @@ items:
 - apiVersion: "v1"
   kind: "Service"
   metadata:
-    name: "elasticsearch-cluster"
+    name: "elasticsearch-masters"
+    labels:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
   spec:
     clusterIP: "None"
     ports:
@@ -117,11 +48,16 @@ items:
         targetPort: 9300
     selector:
       provider: "fabric8"
+      type: "master"
       component: "elasticsearch"
 - apiVersion: "v1"
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-data"
+    labels:
+      component: "elasticsearch"
+      type: "data"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -140,14 +76,14 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
                     fieldPath: "metadata.namespace"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.4.0"
+            image: "fabric8/elasticsearch-k8s:2.2.1"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -164,6 +100,10 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-master"
+    labels:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -182,14 +122,14 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
                     fieldPath: "metadata.namespace"
               - name: "NODE_DATA"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.4.0"
+            image: "fabric8/elasticsearch-k8s:2.2.1"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -198,6 +138,10 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-client"
+    labels:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -216,7 +160,7 @@ items:
         containers:
           - env:
               - name: "SERVICE"
-                value: "elasticsearch-cluster"
+                value: "elasticsearch-masters"
               - name: "KUBERNETES_NAMESPACE"
                 valueFrom:
                   fieldRef:
@@ -225,11 +169,10 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.4.0"
+            image: "fabric8/elasticsearch-k8s:2.2.1"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
                 name: "http"
               - containerPort: 9300
                 name: "transport"
-```

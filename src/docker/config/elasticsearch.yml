@@ -14,18 +14,4 @@
 # limitations under the License.
 #
 
-node.data: ${NODE_DATA}
-node.master: ${NODE_MASTER}
-
 network.host: 0.0.0.0
-
-cloud:
-  kubernetes:
-    service: ${SERVICE}
-    namespace: ${KUBERNETES_NAMESPACE}
-
-discovery:
-  type: kubernetes
-
-path:
-  plugins: /usr/share/elasticsearch/plugins
