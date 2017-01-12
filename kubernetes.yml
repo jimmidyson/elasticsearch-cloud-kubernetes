@@ -64,7 +64,7 @@ items:
                 value: "elasticsearch-cluster"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -102,7 +102,7 @@ items:
                 value: "elasticsearch-cluster"
               - name: "NODE_DATA"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -134,7 +134,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
