@@ -74,7 +74,7 @@ read by the fabric8 kubernetes client when the request is made to the API server
 
 # Kubernetes example
 
-In this example, we're going to use a headless service to look up the Elasticsearch cluster nodes to join.
+In this example, we're going to use a headle service to look up the Elasticsearch cluster nodes to join.
 
 The following manifest uses 3 replication controllers to created Elasticsearch pods in 3 different modes:
 
@@ -242,7 +242,7 @@ items:
                 value: "elasticsearch-cluster"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -280,7 +280,7 @@ items:
                 value: "elasticsearch-cluster"
               - name: "NODE_DATA"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -312,7 +312,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "essearch/elasticsearch-k8s:1.7.6"
+            image: "fabric8/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
