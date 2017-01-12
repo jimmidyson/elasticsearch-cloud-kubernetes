@@ -8,6 +8,7 @@ import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.FailedToResolveConfigException;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
+import org.junit.Assert;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
@@ -23,7 +24,7 @@ public abstract class AbstractK8sTest extends ElasticsearchIntegrationTest {
      * Annotation for tests that require GCE to run. GCE tests are disabled by default.
      * See README file for details.
      */
-   @Documented
+    @Documented
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
     @TestGroup(enabled = false, sysProperty = SYSPROP_K8S)
@@ -47,10 +48,10 @@ public abstract class AbstractK8sTest extends ElasticsearchIntegrationTest {
             if (Strings.hasText(System.getProperty("tests.config"))) {
                 settings.loadFromUrl(environment.resolveConfig(System.getProperty("tests.config")));
             } else {
-                fail("to run integration tests, you need to set -Dtest.k8s=true and -Dtests.config=/path/to/elasticsearch.yml");
+                Assert.fail("to run integration tests, you need to set -Dtest.k8s=true and -Dtests.config=/path/to/elasticsearch.yml");
             }
         } catch (FailedToResolveConfigException exception) {
-            fail("your test configuration file is incorrect: " + System.getProperty("tests.config"));
+            Assert.fail("your test configuration file is incorrect: " + System.getProperty("tests.config"));
         }
         return settings.build();
     }

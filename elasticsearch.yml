@@ -21,11 +21,10 @@ network.host: 0.0.0.0
 
 cloud:
   kubernetes:
-    service: ${SERVICE}
-    namespace: ${KUBERNETES_NAMESPACE}
+    servicedns: ${SERVICE_DNS}
 
 discovery:
-  type: kubernetes
+  type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
   plugins: /usr/share/elasticsearch/plugins

@@ -68,6 +68,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <version>1.3.RC2</version>
@@ -229,15 +234,15 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>docker.io/fabric8/elasticsearch:${elasticsearch.version}</name>
+                            <name>essearch/elasticsearch:${elasticsearch.version}.2</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
                             </build>
                         </image>
                         <image>
-                            <name>docker.io/fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
+                            <name>essearch/elasticsearch-k8s:${elasticsearch.version}.2</name>
                             <build>
-                                <from>docker.io/fabric8/elasticsearch:${elasticsearch.version}</from>
+                                <from>essearch/elasticsearch:${elasticsearch.version}.2</from>
                                 <assembly>
                                     <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
                                     <basedir>/usr/share/elasticsearch/</basedir>
