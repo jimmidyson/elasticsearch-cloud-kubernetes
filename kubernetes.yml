@@ -1,46 +1,36 @@
-#
-# Copyright (C) 2015 Red Hat, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 kind: "List"
 apiVersion: "v1"
 items:
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: elasticsearch
+
 - apiVersion: "v1"
   kind: "Service"
   metadata:
     name: "elasticsearch"
-    labels:
-      component: "elasticsearch"
-      provider: "fabric8"
   spec:
-    ports:
-      - port: 9200
-        targetPort: 9200
+    type: "LoadBalancer"
     selector:
       component: "elasticsearch"
       type: "client"
       provider: "fabric8"
-    type: "LoadBalancer"
+    ports:
+    - name: http
+      port: 9200
+      protocol: TCP
+    - name: transport
+      port: 9300
+      protocol: TCP
+    loadBalancerSourceRanges:
+    - 10.0.0.0/8
+
 - apiVersion: "v1"
   kind: "Service"
   metadata:
-    name: "elasticsearch-masters"
-    labels:
-      component: "elasticsearch"
-      type: "master"
-      provider: "fabric8"
+    name: "elasticsearch-cluster"
   spec:
     clusterIP: "None"
     ports:
@@ -48,16 +38,11 @@ items:
         targetPort: 9300
     selector:
       provider: "fabric8"
-      type: "master"
       component: "elasticsearch"
 - apiVersion: "v1"
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-data"
-    labels:
-      component: "elasticsearch"
-      type: "data"
-      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -75,12 +60,8 @@ items:
         serviceAccountName: elasticsearch
         containers:
           - env:
-              - name: "SERVICE"
-                value: "elasticsearch-masters"
-              - name: "KUBERNETES_NAMESPACE"
-                valueFrom:
-                  fieldRef:
-                    fieldPath: "metadata.namespace"
+              - name: "SERVICE_DNS"
+                value: "elasticsearch-cluster"
               - name: "NODE_MASTER"
                 value: "false"
             image: "essearch/elasticsearch-k8s:1.7.6"
@@ -100,10 +81,6 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-master"
-    labels:
-      component: "elasticsearch"
-      type: "master"
-      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -121,12 +98,8 @@ items:
         serviceAccountName: elasticsearch
         containers:
           - env:
-              - name: "SERVICE"
-                value: "elasticsearch-masters"
-              - name: "KUBERNETES_NAMESPACE"
-                valueFrom:
-                  fieldRef:
-                    fieldPath: "metadata.namespace"
+              - name: "SERVICE_DNS"
+                value: "elasticsearch-cluster"
               - name: "NODE_DATA"
                 value: "false"
             image: "essearch/elasticsearch-k8s:1.7.6"
@@ -138,10 +111,6 @@ items:
   kind: "ReplicationController"
   metadata:
     name: "elasticsearch-client"
-    labels:
-      component: "elasticsearch"
-      type: "master"
-      provider: "fabric8"
   spec:
     replicas: 1
     selector:
@@ -159,12 +128,8 @@ items:
         serviceAccountName: elasticsearch
         containers:
           - env:
-              - name: "SERVICE"
-                value: "elasticsearch-masters"
-              - name: "KUBERNETES_NAMESPACE"
-                valueFrom:
-                  fieldRef:
-                    fieldPath: "metadata.namespace"
+              - name: "SERVICE_DNS"
+                value: "elasticsearch-cluster"
               - name: "NODE_DATA"
                 value: "false"
               - name: "NODE_MASTER"

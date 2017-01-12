@@ -51,8 +51,8 @@ public class K8sUnicastHostsProvider extends AbstractComponent implements
 
     @Inject
     public K8sUnicastHostsProvider(Settings settings,
-            TransportService transportService,
-            NetworkService networkService) {
+                                   TransportService transportService,
+                                   NetworkService networkService) {
         super(settings);
         this.transportService = transportService;
         this.networkService = networkService;
