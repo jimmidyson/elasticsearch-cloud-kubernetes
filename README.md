@@ -8,17 +8,13 @@ The Kubernetes Cloud plugin allows to use Kubernetes API for the unicast discove
 Installation
 ============
 ```
-plugin install io.fabric8/elasticsearch-cloud-kubernetes/2.4.0
+plugin install io.fabric8/elasticsearch-cloud-kubernetes/1.7.6
 ```
 
 Versions available
 ==================
 
-As of `2.0.0`, each released version of this plugin is compatible with the equal version of Elasticsearch,
-e.g. `2.2.0` of this plugin is compatible with `2.2.0` of Elasticsearch.
-
-**Older versions**:
-* `1.3.x` for Elasticsearch `1.6` and `1.7`
+* `1.7.6` for Elasticsearch `1.7.6`
 
 Kubernetes Pod Discovery
 ===============================
@@ -27,12 +23,14 @@ Kubernetes Pod discovery allows to use the kubernetes APIs to perform automatic 
 Here is a simple sample configuration:
 
 ```yaml
-cloud:
-  kubernetes:
-    service: ${SERVICE}
-    namespace: ${NAMESPACE}
 discovery:
-    type: kubernetes
+
+cloud:
+  k8s:
+    servicedns: ${SERVICE_DNS}
+
+discovery:    
+  type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
 
 path:
   data: /data/data
@@ -178,18 +176,111 @@ items:
           provider: "fabric8"
       spec:
         serviceAccount: elasticsearch
+kind: "List"
+apiVersion: "v1"
+items:
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: elasticsearch
+
+- apiVersion: "v1"
+  kind: "Service"
+  metadata:
+    name: "elasticsearch"
+  spec:
+    type: "LoadBalancer"
+    selector:
+      component: "elasticsearch"
+      type: "client"
+      provider: "fabric8"
+    ports:
+    - name: http
+      port: 9200
+      protocol: TCP
+    - name: transport
+      port: 9300
+      protocol: TCP
+    loadBalancerSourceRanges:
+    - 10.0.0.0/8
+
+- apiVersion: "v1"
+  kind: "Service"
+  metadata:
+    name: "elasticsearch-cluster"
+  spec:
+    clusterIP: "None"
+    ports:
+      - port: 9300
+        targetPort: 9300
+    selector:
+      provider: "fabric8"
+      component: "elasticsearch"
+- apiVersion: "v1"
+  kind: "ReplicationController"
+  metadata:
+    name: "elasticsearch-data"
+  spec:
+    replicas: 1
+    selector:
+      component: "elasticsearch"
+      type: "data"
+      provider: "fabric8"
+    template:
+      metadata:
+        labels:
+          component: "elasticsearch"
+          type: "data"
+          provider: "fabric8"
+      spec:
+        serviceAccount: elasticsearch
         serviceAccountName: elasticsearch
         containers:
           - env:
-              - name: "SERVICE"
+              - name: "SERVICE_DNS"
                 value: "elasticsearch-cluster"
-              - name: "KUBERNETES_NAMESPACE"
-                valueFrom:
-                  fieldRef:
-                    fieldPath: "metadata.namespace"
+              - name: "NODE_MASTER"
+                value: "false"
+            image: "essearch/elasticsearch-k8s:1.7.6"
+            name: "elasticsearch"
+            ports:
+              - containerPort: 9300
+                name: "transport"
+            volumeMounts:
+              - mountPath: "/usr/share/elasticsearch/data"
+                name: "elasticsearch-data"
+                readOnly: false
+        volumes:
+          - emptyDir:
+              medium: ""
+            name: "elasticsearch-data"
+- apiVersion: "v1"
+  kind: "ReplicationController"
+  metadata:
+    name: "elasticsearch-master"
+  spec:
+    replicas: 1
+    selector:
+      component: "elasticsearch"
+      type: "master"
+      provider: "fabric8"
+    template:
+      metadata:
+        labels:
+          component: "elasticsearch"
+          type: "master"
+          provider: "fabric8"
+      spec:
+        serviceAccount: elasticsearch
+        serviceAccountName: elasticsearch
+        containers:
+          - env:
+              - name: "SERVICE_DNS"
+                value: "elasticsearch-cluster"
               - name: "NODE_DATA"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.4.0"
+            image: "essearch/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -215,17 +306,13 @@ items:
         serviceAccountName: elasticsearch
         containers:
           - env:
-              - name: "SERVICE"
+              - name: "SERVICE_DNS"
                 value: "elasticsearch-cluster"
-              - name: "KUBERNETES_NAMESPACE"
-                valueFrom:
-                  fieldRef:
-                    fieldPath: "metadata.namespace"
               - name: "NODE_DATA"
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:2.4.0"
+            image: "essearch/elasticsearch-k8s:1.7.6"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
