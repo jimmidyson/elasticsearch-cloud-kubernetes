@@ -234,15 +234,15 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>essearch/elasticsearch:${elasticsearch.version}</name>
+                            <name>fabric8/elasticsearch:${elasticsearch.version}</name>
                             <build>
                                 <dockerFileDir>${project.basedir}/src/main/docker</dockerFileDir>
                             </build>
                         </image>
                         <image>
-                            <name>essearch/elasticsearch-k8s:${elasticsearch.version}</name>
+                            <name>fabric8/elasticsearch-k8s:${elasticsearch.version}</name>
                             <build>
-                                <from>essearch/elasticsearch:${elasticsearch.version}</from>
+                                <from>fabric8/elasticsearch:${elasticsearch.version}</from>
                                 <assembly>
                                     <descriptor>${basedir}/src/main/assemblies/docker-image.xml</descriptor>
                                     <basedir>/usr/share/elasticsearch/</basedir>
