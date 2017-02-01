@@ -70,7 +70,7 @@ public class KubernetesDiscoveryPlugin extends Plugin implements DiscoveryPlugin
                                                             NamedWriteableRegistry namedWriteableRegistry, ClusterService clusterService, UnicastHostsProvider hostsProvider) {
     // this is for backcompat with pre 5.1, where users would set discovery.type to use ec2 hosts provider
     return Collections.singletonMap(KUBERNETES, () ->
-      new ZenDiscovery(settings, threadPool, namedWriteableRegistry, transportService, clusterService, hostsProvider));
+      new ZenDiscovery(settings, threadPool, transportService, namedWriteableRegistry, clusterService, hostsProvider));
   }
 
   @Override
