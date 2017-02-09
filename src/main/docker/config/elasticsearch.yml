@@ -14,17 +14,4 @@
 # limitations under the License.
 #
 
-node.data: ${NODE_DATA}
-node.master: ${NODE_MASTER}
-
 network.host: 0.0.0.0
-
-cloud:
-  k8s:
-    servicedns: ${SERVICE_DNS}
-
-discovery:
-  type: io.fabric8.elasticsearch.discovery.k8s.K8sDiscoveryModule
-
-path:
-  plugins: /usr/share/elasticsearch/plugins

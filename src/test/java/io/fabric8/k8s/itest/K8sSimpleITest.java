@@ -7,6 +7,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Test;
 
 @AbstractK8sTest.K8sTest
@@ -32,7 +33,7 @@ public class K8sSimpleITest extends AbstractK8sTest {
 
         System.out.println(clusterState.getState().getNodes().getSize());
 
-        assertThat(clusterState.getState().getNodes().getSize(), Matchers.greaterThanOrEqualTo(2));
+        Assert.assertThat(clusterState.getState().getNodes().getSize(), Matchers.greaterThanOrEqualTo(2));
     }
 
     @Override
