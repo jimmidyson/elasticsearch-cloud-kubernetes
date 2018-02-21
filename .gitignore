@@ -11,3 +11,4 @@
 *.vmoptions
 .local-execution-hints.log
 plugin_tools
+.sts4-cache/
