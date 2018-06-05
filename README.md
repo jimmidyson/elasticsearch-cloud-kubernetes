@@ -23,7 +23,7 @@ Alternatively, you can utilize [headless services](https://kubernetes.io/docs/co
         component: es
       sessionAffinity: None
       type: ClusterIP
- 
+
  elasticsearch.yml:
 
     ...
@@ -37,7 +37,7 @@ Alternatively, you can utilize [headless services](https://kubernetes.io/docs/co
 Installation
 ============
 ```
-elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.3.2
+elasticsearch-plugin install io.fabric8:elasticsearch-cloud-kubernetes:6.2.4
 
 ```
 
@@ -175,7 +175,7 @@ items:
               - name: "NODE_MASTER"
                 value: "false"
 
-            image: "fabric8/elasticsearch-k8s:6.2.3"
+            image: "fabric8/elasticsearch-k8s:6.2.4"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -218,7 +218,7 @@ items:
               - name: "NODE_DATA"
                 value: "false"
 
-            image: "fabric8/elasticsearch-k8s:6.2.3"
+            image: "fabric8/elasticsearch-k8s:6.2.4"
             name: "elasticsearch"
             ports:
               - containerPort: 9300
@@ -254,7 +254,7 @@ items:
                 value: "false"
               - name: "NODE_MASTER"
                 value: "false"
-            image: "fabric8/elasticsearch-k8s:6.2.3"
+            image: "fabric8/elasticsearch-k8s:6.2.4"
             name: "elasticsearch"
             ports:
               - containerPort: 9200
